@@ -28,8 +28,8 @@ import time
 class pyPSSE_instance:
 
     def __init__(self, settinigs_toml_path='', psse_path=''):
-        
-        
+
+
          #** Initialize PSSE modules
         if psse_path != '':
             sys.path.append(psse_path)
@@ -40,7 +40,7 @@ class pyPSSE_instance:
             os.environ['PATH'] += ';' + self.settings["PSSE_path"]
 
         #** Initialize PSSE modules
-        
+
         try:
             nBus = 200000
             import psse34
@@ -52,14 +52,14 @@ class pyPSSE_instance:
             self.PSSE.psseinit(nBus)
 
             self.initComplete = True
-        
-        
+
+
             self.message = 'success'
 
             if settinigs_toml_path != '':
                 self.start_simulation(settinigs_toml_path)
-        
-        
+
+
         except Exception as e:
             self.logger.error("A valid PSS/E license not found. License may currently be in use.")
             self.logger.flush()
@@ -68,14 +68,14 @@ class pyPSSE_instance:
             self.message = str(e)
             raise Exception("A valid PSS/E license not found. License may currently be in use.")
 
-        
+
         return
 
     def start_simulation(self, settinigs_toml_path):
 
         self.hi = None
         self.simStartTime = time.time()
-        
+
         self.settings = self.read_settings(settinigs_toml_path)
         export_settings_path = os.path.join(
             self.settings["Simulation"]["Project Path"], 'Settings', 'export_settings.toml'
@@ -85,7 +85,7 @@ class pyPSSE_instance:
         log_path = os.path.join(self.settings["Simulation"]["Project Path"], 'Logs')
         self.logger = Logger.getLogger('pyPSSE', log_path, LoggerOptions=self.settings["Logging"])
         self.logger.debug('Starting PSSE instance')
-        
+
 
         #** Initialize PSSE modules
 
@@ -311,6 +311,11 @@ class pyPSSE_instance:
     def update_contingencies(self, t):
         for c_name, c in self.contingencies.items():
             c.update(t)
+
+    def inject_contingencies_external(self,temp):
+        print("external settings : ", temp , flush=True)
+        contingencies = c.build_contingencies(self.PSSE, temp, self.logger)
+        self.contingencies.update(contingencies)
 
 if __name__ == '__main__':
     #x = pyPSSE_instance(r'C:\Users\alatif\Desktop\NEARM_sim\PSSE_studycase\PSSE_WECC_model\Settings\pyPSSE_settings.toml')
